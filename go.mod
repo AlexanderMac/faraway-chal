@@ -1,3 +1,3 @@
-module github.com/AlexanderMac/go-app-template
+module github.com/AlexanderMac/faraway-chal
 
 go 1.21
