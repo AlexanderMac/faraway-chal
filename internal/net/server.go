@@ -11,20 +11,28 @@ import (
 	"github.com/AlexanderMac/faraway-chal/internal/utils"
 )
 
-func RunServer(srvAddr string) {
-	listener, err := net.Listen("tcp", srvAddr)
-	utils.CheckErrorWithMessage(err, fmt.Sprintf("Unable to start server %s", srvAddr))
+type Server struct {
+	srvAddr string
+}
+
+func NewServer(srvAddr string) *Server {
+	return &Server{srvAddr}
+}
+
+func (server *Server) Start() {
+	listener, err := net.Listen("tcp", server.srvAddr)
+	utils.CheckErrorWithMessage(err, fmt.Sprintf("Unable to start server %s", server.srvAddr))
 	defer listener.Close()
-	fmt.Printf("Listening on %s\n", srvAddr)
+	fmt.Printf("Listening on %s\n", server.srvAddr)
 
 	for {
 		conn, err := listener.Accept()
 		utils.CheckError(err)
-		go handleClientMessage(conn)
+		go server.handleMessage(conn)
 	}
 }
 
-func handleClientMessage(conn net.Conn) {
+func (server *Server) handleMessage(conn net.Conn) {
 	defer conn.Close()
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 

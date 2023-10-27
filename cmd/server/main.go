@@ -14,5 +14,6 @@ func main() {
 	flag.Parse()
 
 	srvAddr := fmt.Sprintf("%s:%d", *host, *port)
-	_net.RunServer(srvAddr)
+	server := _net.NewServer(srvAddr)
+	server.Start()
 }

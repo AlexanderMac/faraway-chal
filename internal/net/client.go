@@ -11,18 +11,26 @@ import (
 	"github.com/AlexanderMac/faraway-chal/internal/utils"
 )
 
-func RunClient(srvAddr string) {
-	conn, err := net.Dial("tcp", srvAddr)
-	utils.CheckErrorWithMessage(err, fmt.Sprintf("Unable to connect to remote server %s", srvAddr))
+type Client struct {
+	srvAddr string
+}
+
+func NewClient(srvAddr string) *Client {
+	return &Client{srvAddr}
+}
+
+func (client *Client) Start() {
+	conn, err := net.Dial("tcp", client.srvAddr)
+	utils.CheckErrorWithMessage(err, fmt.Sprintf("Unable to connect to remote server %s", client.srvAddr))
 	defer conn.Close()
-	fmt.Printf("Connected to %s...\n", srvAddr)
+	fmt.Printf("Connected to %s...\n", client.srvAddr)
 
 	var outMsg = Message{
 		Code: constants.INIT_MSG,
 	}
 	for {
-		inMsg, err := handleServerMessage(conn, outMsg)
-		utils.CheckErrorWithMessage(err, "Error on handle message")
+		inMsg, err := client.handleMessage(conn, &outMsg)
+		utils.CheckError(err)
 
 		switch inMsg.Code {
 		case constants.CHALLENGE_MSG:
@@ -43,19 +51,22 @@ func RunClient(srvAddr string) {
 	}
 }
 
-func handleServerMessage(conn net.Conn, outMsg Message) (Message, error) {
+func (client *Client) handleMessage(conn net.Conn, outMsg *Message) (*Message, error) {
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 
 	message := fmt.Sprintf("%s:%s", outMsg.Code, outMsg.Data)
 	_, err := rw.WriteString(message + "\n")
 	if err != nil {
-		return Message{}, err
+		return &Message{}, err
 	}
-	rw.Flush()
+	err = rw.Flush()
+	if err != nil {
+		return &Message{}, err
+	}
 
 	message, err = rw.ReadString('\n')
 	if err != nil {
-		return Message{}, err
+		return &Message{}, err
 	}
 
 	message = strings.Trim(message, "\n ")
@@ -65,5 +76,5 @@ func handleServerMessage(conn net.Conn, outMsg Message) (Message, error) {
 		Data: parsed[1],
 	}
 
-	return inMsg, nil
+	return &inMsg, nil
 }
