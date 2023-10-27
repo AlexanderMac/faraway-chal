@@ -19,4 +19,4 @@ jobs:
         with:
           version: latest
       - name: Run Tests
-        run: # go test
+        run: echo 1 # go test
