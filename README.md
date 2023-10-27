@@ -15,7 +15,7 @@ Docker files are provided for the server and the client sides.
 
 #### Challenge-response protocol:
 
-I haven't found any RFC document related to the protocol format and flow on the Internet. So I've created a simple protocol by myself. This protocol operates with the binary data in the format `code:json`, where the `code` is the name of the message and the `json` is the data. There are three JSON schemes, one schema for each message.
+I haven't found any RFC specification related to the protocol format and data flow on the Internet. So I've created a simple protocol by myself. This protocol works with binary encoded data in gob format. There are three struct types, one type for each type of the message.
 
 #### Data flow
 
