@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 
 	"github.com/AlexanderMac/faraway-chal/internal/constants"
 	"github.com/AlexanderMac/faraway-chal/internal/utils"
@@ -23,27 +22,29 @@ func (client *Client) Start() {
 	conn, err := net.Dial("tcp", client.srvAddr)
 	utils.CheckErrorWithMessage(err, fmt.Sprintf("Unable to connect to remote server %s", client.srvAddr))
 	defer conn.Close()
-	fmt.Printf("Connected to %s...\n", client.srvAddr)
+	fmt.Printf("Connected to %s\n", client.srvAddr)
 
-	var outMsg = Message{
+	var outputMsg = Message{
 		Code: constants.INIT_MSG,
 	}
 	for {
-		inMsg, err := client.handleMessage(conn, &outMsg)
+		fmt.Printf("Sending message: %v\n", outputMsg)
+		inputMsg, err := client.handleMessage(conn, &outputMsg)
 		utils.CheckError(err)
 
-		switch inMsg.Code {
+		fmt.Printf("Got message: %v\n", inputMsg)
+		switch inputMsg.Code {
 		case constants.CHALLENGE_MSG:
-			outMsg = Message{
+			outputMsg = Message{
 				Code: constants.SOLUTION_MSG,
 				Data: "solution",
 			}
 		case constants.GRANT_MSG:
-			fmt.Printf("Granted access, the response data: %s\n", inMsg.Data)
+			fmt.Printf("Granted access, the response data: %s\n", inputMsg.Data)
 			os.Exit(0)
 		default:
-			fmt.Printf("Unrecognized message code: %s. Resending >init\n", inMsg.Code)
-			outMsg = Message{
+			fmt.Printf("Unrecognized message code: %s. Resending >init message\n", inputMsg.Code)
+			outputMsg = Message{
 				Code: constants.INIT_MSG,
 				Data: "",
 			}
@@ -51,30 +52,13 @@ func (client *Client) Start() {
 	}
 }
 
-func (client *Client) handleMessage(conn net.Conn, outMsg *Message) (*Message, error) {
-	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+func (client *Client) handleMessage(conn net.Conn, outputMsg *Message) (*Message, error) {
+	w := bufio.NewWriter(conn)
+	err := utils.GobWrite(w, outputMsg)
+	utils.CheckError(err)
 
-	message := fmt.Sprintf("%s:%s", outMsg.Code, outMsg.Data)
-	_, err := rw.WriteString(message + "\n")
-	if err != nil {
-		return &Message{}, err
-	}
-	err = rw.Flush()
-	if err != nil {
-		return &Message{}, err
-	}
+	inputMsg, err := utils.GobRead[Message](bufio.NewReader(conn))
+	utils.CheckError(err)
 
-	message, err = rw.ReadString('\n')
-	if err != nil {
-		return &Message{}, err
-	}
-
-	message = strings.Trim(message, "\n ")
-	parsed := strings.Split(message, ":")
-	inMsg := Message{
-		Code: parsed[0],
-		Data: parsed[1],
-	}
-
-	return &inMsg, nil
+	return inputMsg, nil
 }

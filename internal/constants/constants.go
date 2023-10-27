@@ -5,4 +5,5 @@ const (
 	CHALLENGE_MSG = "challenge"
 	SOLUTION_MSG  = "solution"
 	GRANT_MSG     = "grant"
+	ERROR_MSG     = "error"
 )

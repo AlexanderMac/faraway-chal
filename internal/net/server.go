@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strings"
 
 	"github.com/AlexanderMac/faraway-chal/internal/constants"
 	"github.com/AlexanderMac/faraway-chal/internal/utils"
@@ -34,47 +33,48 @@ func (server *Server) Start() {
 
 func (server *Server) handleMessage(conn net.Conn) {
 	defer conn.Close()
-	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+	reader := bufio.NewReader(conn)
+	writer := bufio.NewWriter(conn)
 
 	remoteAddr := conn.RemoteAddr().String()
 	fmt.Printf("Client connected from %s\n", remoteAddr)
 
 connected:
 	for {
-		message, err := rw.ReadString('\n')
+		message, err := utils.GobRead[Message](reader)
 		switch {
 		case err == io.EOF:
 			break connected
 		case err != nil:
 			utils.CheckError(err)
 		}
+		fmt.Printf("Got message: %v\n", message)
 
-		message = strings.Trim(message, "\n ")
-		parsed := strings.Split(message, ":")
-		code, data := parsed[0], parsed[1]
-		fmt.Printf("Got message with code: %s, and data: %s\n", code, data)
-
-		switch code {
+		switch message.Code {
 		case constants.INIT_MSG:
 			// TODO: generate challenge
-			message = fmt.Sprintf("%s:%s", constants.CHALLENGE_MSG, "challenge-data")
-			_, err = rw.WriteString(message + "\n")
+			message = &Message{
+				Code: constants.CHALLENGE_MSG,
+				Data: "challenge-data",
+			}
+			err = utils.GobWrite(writer, message)
 			utils.CheckError(err)
 		case constants.SOLUTION_MSG:
 			// TODO: validate solution
 			// TODO: get poem
-			message = fmt.Sprintf("%s:%s", constants.GRANT_MSG, "grant-data")
-			_, err = rw.WriteString(message + "\n")
+			message = &Message{
+				Code: constants.GRANT_MSG,
+				Data: "grant-data",
+			}
+			err = utils.GobWrite(writer, message)
 			utils.CheckError(err)
 		default:
-			_, err = rw.WriteString("Unrecognized message code\n")
+			message = &Message{
+				Code: constants.ERROR_MSG,
+				Data: "Unrecognized message code",
+			}
+			err = utils.GobWrite(writer, message)
 			utils.CheckError(err)
-		}
-
-		err = rw.Flush()
-		if err != nil {
-			fmt.Printf("Unable to send message: %s\n", err)
-			break
 		}
 	}
 
