@@ -1,0 +1,17 @@
+version: '3'
+services:
+  server:
+    build:
+      context: ./
+      dockerfile: ./scripts/server/Dockerfile
+    image: faraway-chal-server
+    container_name: faraway-chal-server
+    ports:
+      - 3000:3000
+  client:
+    build:
+      context: ./
+      dockerfile: ./scripts/client/Dockerfile
+    image: faraway-chal-client
+    container_name: faraway-chal-client
+    network_mode: host

@@ -15,30 +15,35 @@ Docker files are provided for the server and the client sides.
 
 #### Challenge-response protocol:
 
-I haven't found any RFC specification related to the protocol format and data flow on the Internet. So I've created a simple protocol by myself. This protocol works with binary encoded data in gob format. There are three struct types, one type for each type of the message.
+I haven't found any RFC specification related to the protocol format and data flow on the Internet. So I've created a simple protocol by myself. This protocol works with binary encoded data in the following format:
+- first byte: message id
+- rest bytes: message structure in gob format.
+
+There are a few structures, a structure type for each message.
 
 #### Data flow
 
 | Client                                                       | Message         | Server                                                       |
 | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| Sends an initial message without data.                       | => init         |                                                              |
-|                                                              | <= challenge    | Creates a hash by combining the secret key and the client's IP address.<br />Randomly selects POW algorithm and difficulty.<br />Sends the hash and POW details to the client. |
-| Solves the challenge.<br />Sends the generated hash to the server. | => solution     |                                                              |
-|                                                              | <= grant-access | Validates the client hash.<br />If it's valid, grants the access (returns a poem). |
-| Prints the poem and exits.                                   |                 |                                                              |
+| Sends an initial message without data.                       | => challenge    |                                                              |
+|                                                              | <= challenge    | Creates a hash by combining the secret key, client's IP address and nonce.<br />Sends the challenge to the client. |
+| Solves the challenge.<br />Sends the solution to the server. | => solution     |                                                              |
+|                                                              | <= grant        | Validates the client solution.<br />If it's valid, grants the access (returns a poem), otherwise returns an error. |
+| Prints the poem to console and exits.                        |                 |                                                              |
 
 #### POW algorithm
-I've implemented two POW algorithms. They were chosen because TODO.
+In my implementation I've used _Hashcash_ PoW algorithm. It was chosen because of its simplicity and prevalence. The difficulty is hardcoded and equals 10.
 
 ### Usage
 ```sh
 # First, run the server
-scripts/run-server.sh
+$ scripts/server/run.sh
 
 # Then, run the client
-scripts/run-client.sh
+$ scripts/client/run.sh
 
-# That's it
+# Or run applications as Docker Containers
+$ sudo docker compose up
 ```
 
 ### License
