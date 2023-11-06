@@ -1,9 +1,13 @@
 package constants
 
 const (
-	INIT_MSG      = "init"
-	CHALLENGE_MSG = "challenge"
-	SOLUTION_MSG  = "solution"
-	GRANT_MSG     = "grant"
-	ERROR_MSG     = "error"
+	ERROR_MESSAGE_ID = iota
+	CHALLENGE_MESSAGE_ID
+	SOLUTION_MESSAGE_ID
+	GRANT_MESSAGE_ID
+)
+
+const (
+	SECRET     = "DWbIkE8i2UeB32ZRI6FecPx8OCMZCqmM"
+	DIFFICULTY = 3
 )
