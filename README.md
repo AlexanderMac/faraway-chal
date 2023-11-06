@@ -23,12 +23,12 @@ There are a few structures, a structure type for each message.
 
 #### Data flow
 
-| Client                                                       | Message         | Server                                                       |
-| ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| Sends an initial message without data.                       | => challenge    |                                                              |
-|                                                              | <= challenge    | Creates a hash by combining the secret key, client's IP address and nonce.<br />Sends the challenge to the client. |
-| Solves the challenge.<br />Sends the solution to the server. | => solution     |                                                              |
-|                                                              | <= grant        | Validates the client solution.<br />If it's valid, grants the access (returns a poem), otherwise returns an error. |
+| Client                                                       | Direction | Message         | Server                                                       |
+| ------------------------------------------------------------ | --------- | --------------- | ------------------------------------------------------------ |
+| Sends an initial message without data.                       | => | challenge    |                                                              |
+|                                                              | <= | challenge    | Creates a hash by combining the secret key, client's IP address and nonce.<br />Sends the challenge to the client. |
+| Solves the challenge.<br />Sends the solution to the server. | => | solution     |                                                              |
+|                                                              | <= | grant        | Validates the client solution.<br />If it's valid, grants the access (returns a poem), otherwise returns an error. |
 | Prints the poem to console and exits.                        |                 |                                                              |
 
 #### POW algorithm
