@@ -9,5 +9,5 @@ const (
 
 const (
 	SECRET     = "DWbIkE8i2UeB32ZRI6FecPx8OCMZCqmM"
-	DIFFICULTY = 3
+	DIFFICULTY = 10
 )

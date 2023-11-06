@@ -17,7 +17,7 @@ func (hashcash *Hashcash) Solve(challenge string, difficulty int) string {
 	var hash string
 	var nonce int
 	for nonce < math.MaxInt64 {
-		hash := hashcash.calculateHash(challenge, nonce)
+		hash = hashcash.calculateHash(challenge, nonce)
 		hashInt := new(big.Int)
 		hashInt.SetString(hash, 16)
 

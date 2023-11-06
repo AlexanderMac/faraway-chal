@@ -28,12 +28,17 @@ func (client *Client) Start() {
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
 
+	var maxAttempts = 0
 	var currentMessageId = constants.CHALLENGE_MESSAGE_ID
 	var solutionMsg *SolutionMessage
 	for {
 		fmt.Printf("Sending message with Id: %v\n", currentMessageId)
 		switch currentMessageId {
 		case constants.CHALLENGE_MESSAGE_ID:
+			if maxAttempts > 10 {
+				return
+			}
+			maxAttempts++
 			err := client.sendChallengeMessage(writer)
 			utils.CheckError(err, "")
 		case constants.SOLUTION_MESSAGE_ID:
@@ -56,6 +61,11 @@ func (client *Client) Start() {
 		case constants.GRANT_MESSAGE_ID:
 			err = client.handleGrantMessage(reader)
 			utils.CheckError(err, "")
+		case constants.ERROR_MESSAGE_ID:
+			err = client.handleErrorMessage(reader)
+			utils.CheckError(err, "")
+			currentMessageId = constants.CHALLENGE_MESSAGE_ID
+			solutionMsg = nil
 		default:
 			fmt.Printf("Unrecognized message Id: %d. Resending >challenge message\n", msgId)
 			currentMessageId = constants.CHALLENGE_MESSAGE_ID
@@ -98,6 +108,17 @@ func (client *Client) handleGrantMessage(reader *bufio.Reader) error {
 
 	fmt.Printf("Access Granted! Text: %s\n", grantMsg.Text)
 	os.Exit(0)
+
+	return nil
+}
+
+func (client *Client) handleErrorMessage(reader *bufio.Reader) error {
+	errMsg, err := utils.ReadMessage[ErrorMessage](reader)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Got error from the server: %s\n", errMsg.Text)
 
 	return nil
 }
