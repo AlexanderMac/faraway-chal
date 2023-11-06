@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/AlexanderMac/faraway-chal/internal/constants"
+	"github.com/AlexanderMac/faraway-chal/internal/data"
 	"github.com/AlexanderMac/faraway-chal/internal/pows"
 	"github.com/AlexanderMac/faraway-chal/internal/utils"
 )
@@ -116,8 +117,13 @@ func (server *Server) handleSolutionMessage(reader *bufio.Reader, writer *bufio.
 		return server.sendErrorMessage(writer, "Incorrect solution: "+solutionMsg.Solution)
 	}
 
+	poem, err := data.ReadPoem()
+	if err != nil {
+		return err
+	}
+
 	grantMsg := &GrantMessage{
-		Text: "poem",
+		Text: poem,
 	}
 	return utils.SendMessage(writer, constants.GRANT_MESSAGE_ID, grantMsg)
 }
