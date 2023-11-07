@@ -117,6 +117,10 @@ func (server *Server) handleSolutionMessage(reader *bufio.Reader, writer *bufio.
 		return server.sendErrorMessage(writer, "Incorrect solution: "+solutionMsg.Solution)
 	}
 
+	mut.Lock()
+	delete(challenges, solutionMsg.Challenge)
+	mut.Unlock()
+
 	poem, err := data.ReadPoem()
 	if err != nil {
 		return err
