@@ -14,14 +14,15 @@ import (
 
 type Server struct {
 	serverAddr string
+	mut        sync.RWMutex
+	challenges map[string]bool
 }
 
-var mut sync.RWMutex
-
-var challenges = make(map[string]bool)
-
 func NewServer(serverAddr string) *Server {
-	return &Server{serverAddr}
+	return &Server{
+		serverAddr: serverAddr,
+		challenges: make(map[string]bool),
+	}
 }
 
 func (server *Server) Start() {
@@ -83,9 +84,9 @@ func (server *Server) handleChallengeMessage(reader *bufio.Reader, writer *bufio
 	}
 
 	challenge := utils.CreateChallenge(clientAddr)
-	mut.Lock()
-	challenges[challenge] = true
-	mut.Unlock()
+	server.mut.Lock()
+	server.challenges[challenge] = true
+	server.mut.Unlock()
 
 	challengeMsg := &ChallengeMessage{
 		Algorithm:  "Hashcash",
@@ -101,9 +102,9 @@ func (server *Server) handleSolutionMessage(reader *bufio.Reader, writer *bufio.
 		return err
 	}
 
-	mut.RLock()
-	_, ok := challenges[solutionMsg.Challenge]
-	mut.RUnlock()
+	server.mut.RLock()
+	_, ok := server.challenges[solutionMsg.Challenge]
+	server.mut.RUnlock()
 	if !ok {
 		return server.sendErrorMessage(writer, "Unknown challenge: "+solutionMsg.Challenge)
 	}
@@ -117,9 +118,9 @@ func (server *Server) handleSolutionMessage(reader *bufio.Reader, writer *bufio.
 		return server.sendErrorMessage(writer, "Incorrect solution: "+solutionMsg.Solution)
 	}
 
-	mut.Lock()
-	delete(challenges, solutionMsg.Challenge)
-	mut.Unlock()
+	server.mut.Lock()
+	delete(server.challenges, solutionMsg.Challenge)
+	server.mut.Unlock()
 
 	poem, err := data.ReadPoem()
 	if err != nil {
