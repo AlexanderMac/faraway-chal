@@ -11,9 +11,9 @@ type ChallengeMessage struct {
 }
 
 type SolutionMessage struct {
-	Algorithm string
-	Challenge string
-	Solution  string
+	Algorithm     string
+	Challenge     string
+	SolutionNonce int
 }
 
 type GrantMessage struct {

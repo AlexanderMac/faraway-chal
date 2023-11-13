@@ -10,7 +10,7 @@ import (
 
 type Hashcash struct{}
 
-func (hashcash *Hashcash) Solve(challenge string, difficulty int) string {
+func (hashcash *Hashcash) Solve(challenge string, difficulty int) int {
 	target := big.NewInt(1)
 	target.Lsh(target, uint(256-difficulty))
 
@@ -28,14 +28,15 @@ func (hashcash *Hashcash) Solve(challenge string, difficulty int) string {
 		}
 	}
 
-	return hash
+	return nonce
 }
 
-func (hashcash *Hashcash) Validate(challenge string, solution string, difficulty int) (bool, error) {
+func (hashcash *Hashcash) Validate(challenge string, solutionNonce int, difficulty int) (bool, error) {
 	target := big.NewInt(1)
 	target.Lsh(target, uint(256-difficulty))
 
-	hash, err := hex.DecodeString(solution)
+	hashStr := hashcash.calculateHash(challenge, solutionNonce)
+	hash, err := hex.DecodeString(hashStr)
 	if err != nil {
 		return false, err
 	}

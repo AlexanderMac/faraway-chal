@@ -86,12 +86,12 @@ func (client *Client) handleChallengeMessage(reader *bufio.Reader) (*SolutionMes
 	}
 
 	hashcash := new(pows.Hashcash)
-	solution := hashcash.Solve(challengeMsg.Challenge, challengeMsg.Difficulty)
+	solutionNonce := hashcash.Solve(challengeMsg.Challenge, challengeMsg.Difficulty)
 
 	solutionMsg := &SolutionMessage{
-		Algorithm: challengeMsg.Algorithm,
-		Challenge: challengeMsg.Challenge,
-		Solution:  solution,
+		Algorithm:     challengeMsg.Algorithm,
+		Challenge:     challengeMsg.Challenge,
+		SolutionNonce: solutionNonce,
 	}
 	return solutionMsg, nil
 }

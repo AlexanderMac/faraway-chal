@@ -110,12 +110,12 @@ func (server *Server) handleSolutionMessage(reader *bufio.Reader, writer *bufio.
 	}
 
 	var hashcash pows.Hashcash
-	valid, err := hashcash.Validate(solutionMsg.Challenge, solutionMsg.Solution, constants.DIFFICULTY)
+	valid, err := hashcash.Validate(solutionMsg.Challenge, solutionMsg.SolutionNonce, constants.DIFFICULTY)
 	if err != nil {
 		return err
 	}
 	if !valid {
-		return server.sendErrorMessage(writer, "Incorrect solution: "+solutionMsg.Solution)
+		return server.sendErrorMessage(writer, fmt.Sprintf("Incorrect solution nonce: %d", solutionMsg.SolutionNonce))
 	}
 
 	server.mut.Lock()
