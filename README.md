@@ -19,7 +19,7 @@ An implementation of a TCP server protected from DDoS attacks with the [Proof of
 When the clients solves the challenge, the server sends one of the quotes from _Word of wisdom_ book.
 Docker files are provided for the server and the client sides.
 
-## Challenge-response protocol:
+## Challenge-response protocol
 
 I haven't found any RFC specification related to the protocol format and data flow on the Internet. So I've created a simple protocol by myself. This protocol works with binary encoded data in the following format:
 - first byte: message id
