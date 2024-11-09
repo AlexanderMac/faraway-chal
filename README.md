@@ -6,7 +6,6 @@
   </div>
 </div>
 
-
 # Contents
 - [Contents](#contents)
 - [Algorithm](#algorithm)
