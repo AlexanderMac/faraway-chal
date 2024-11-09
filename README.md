@@ -1,9 +1,9 @@
 <div align="center">
   <h1>Faraway Challenge</h1>
-  <div>
+  <p>
     <a href="https://github.com/alexandermac/faraway-chal/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/alexandermac/faraway-chal/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/alexandermac/faraway-chal.svg" alt="License"></a>
-  </div>
+  </p>
 </div>
 
 # Contents
